@@ -1,13 +1,13 @@
 package com.saucedemo.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.List;
 
 /**
  * Page Object for the SauceDemo inventory (products) page.
@@ -67,11 +67,9 @@ public class InventoryPage {
      * @return this InventoryPage instance for fluent chaining
      */
     public InventoryPage addFirstItemToCart() {
-        List<WebElement> addButtons = driver.findElements(ADD_TO_CART_BUTTONS);
-        if (addButtons.isEmpty()) {
-            throw new IllegalStateException("No 'Add to Cart' buttons found on inventory page");
-        }
-        addButtons.get(0).click();
+        WebElement addButton = wait.until(
+                ExpectedConditions.elementToBeClickable(ADD_TO_CART_BUTTONS));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
         return this;
     }
 
@@ -81,11 +79,13 @@ public class InventoryPage {
      * @return the number displayed on the cart badge, or 0 if no badge is present
      */
     public int getCartBadgeCount() {
-        List<WebElement> badges = driver.findElements(CART_BADGE);
-        if (badges.isEmpty()) {
+        try {
+            WebElement badge = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(CART_BADGE));
+            return Integer.parseInt(badge.getText());
+        } catch (Exception e) {
             return 0;
         }
-        return Integer.parseInt(badges.get(0).getText());
     }
 
     /**
@@ -94,7 +94,12 @@ public class InventoryPage {
      * @return true if the cart badge is visible
      */
     public boolean isCartBadgeDisplayed() {
-        return !driver.findElements(CART_BADGE).isEmpty();
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(CART_BADGE));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
