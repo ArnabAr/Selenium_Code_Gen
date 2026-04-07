@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# IDE / Editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Selenium / WebDriver
+*.log
+chromedriver
+geckodriver
+msedgedriver
+screenshots/
+
+# Test reports
+reports/
+allure-results/
+htmlcov/
+.coverage
+*.xml
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# mypy / type checking
+.mypy_cache/
