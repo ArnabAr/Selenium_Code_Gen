@@ -5,9 +5,11 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * Page Object for the SauceDemo inventory (products) page.
@@ -23,6 +25,8 @@ public class InventoryPage {
     private static final By CART_BADGE = By.className("shopping_cart_badge");
     private static final By CART_LINK = By.className("shopping_cart_link");
     private static final By PAGE_TITLE = By.className("title");
+    private static final By SORT_DROPDOWN = By.cssSelector("select[data-test='product-sort-container']");
+    private static final By ITEM_PRICE = By.className("inventory_item_price");
 
     public InventoryPage(WebDriver driver) {
         this.driver = driver;
@@ -106,6 +110,50 @@ public class InventoryPage {
      * Click the cart icon to navigate to the cart page.
      */
     public void clickCartLink() {
-        wait.until(ExpectedConditions.elementToBeClickable(CART_LINK)).click();
+        WebElement cartLink = wait.until(ExpectedConditions.elementToBeClickable(CART_LINK));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", cartLink);
+    }
+
+    /**
+     * Select a sorting option from the product sort dropdown.
+     *
+     * @param value the value attribute of the option (e.g., "hilo", "lohi", "az", "za")
+     * @return this InventoryPage instance for fluent chaining
+     */
+    public InventoryPage sortBy(String value) {
+        WebElement sortDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(SORT_DROPDOWN));
+        new Select(sortDropdown).selectByValue(value);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(INVENTORY_LIST));
+        return this;
+    }
+
+    /**
+     * Get all item prices displayed on the inventory page.
+     *
+     * @return list of prices as doubles
+     */
+    public List<Double> getAllItemPrices() {
+        List<WebElement> priceElements = wait.until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(ITEM_PRICE));
+        return priceElements.stream()
+                .map(e -> Double.parseDouble(e.getText().replace("$", "")))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Click the "Add to Cart" button for the item at the given index (0-based).
+     *
+     * @param index the index of the item to add
+     * @return this InventoryPage instance for fluent chaining
+     */
+    public InventoryPage addItemToCartByIndex(int index) {
+        List<WebElement> addButtons = driver.findElements(ADD_TO_CART_BUTTONS);
+        if (index >= addButtons.size()) {
+            throw new IllegalStateException(
+                    "Index " + index + " out of bounds, only " + addButtons.size() + " add-to-cart buttons found");
+        }
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButtons.get(index));
+        return this;
     }
 }
